@@ -83,13 +83,44 @@
                 </div>
                 <img class="img-fluid" :src="tempProduct.imageUrl" alt="" />
               </div>
-              <div v-if="!tempProduct.imageUrl">
+              <h3 class="mb-3">多圖新增</h3>
+              <div v-if="Array.isArray(tempProduct.imagesUrl)">
+                <div v-for="(img, key) in tempProduct.imagesUrl" :key="key">
+                  <label for="imageUrl" class="form-label">圖片{{ key + 1 }}網址</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    placeholder="請輸入圖片連結"
+                    v-model="tempProduct.imagesUrl[key]"
+                  />
+                  <img :src="img" alt="" class="img-fluid mb-3" />
+                </div>
+                <button
+                  class="btn btn-outline-primary btn-sm d-block w-100"
+                  v-if="
+                    tempProduct.imagesUrl.length === 0 ||
+                    tempProduct.imagesUrl[tempProduct.imagesUrl.length - 1]
+                  "
+                  @click="tempProduct.imagesUrl.push('')"
+                >
+                  新增圖片
+                </button>
+                <button
+                  class="btn btn-outline-danger btn-sm d-block w-100"
+                  v-else
+                  @click="tempProduct.imagesUrl.pop()"
+                >
+                  刪除圖片
+                </button>
+              </div>
+
+              <!-- <div v-if="!tempProduct.imageUrl">
                 <button class="btn btn-outline-primary btn-sm d-block w-100">新增圖片</button>
               </div>
               <div v-else>
-                <!-- v-else -->
+                v-else
                 <button class="btn btn-outline-danger btn-sm d-block w-100">刪除圖片</button>
-              </div>
+              </div> -->
             </div>
             <div class="col-sm-8">
               <div class="mb-3">
@@ -191,7 +222,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <button type="button" class="btn btn-outline-secondary" @click="noConfirmProduct()">
             取消
           </button>
           <button type="button" class="btn btn-primary" @click="confirmProduct(state)">確認</button>
@@ -239,6 +270,7 @@
 </template>
 
 <script>
+import * as bootstrap from 'bootstrap'
 const { VITE_API, VITE_PATH } = import.meta.env
 let productModalUse = null
 let delProductModalUse = null
@@ -247,7 +279,9 @@ export default {
   data() {
     return {
       state: '新增',
-      tempProduct: {},
+      tempProduct: {
+        imagesUrl: []
+      },
       products: []
     }
   },
@@ -267,8 +301,7 @@ export default {
       this.axios
         .get(`${VITE_API}/api/${VITE_PATH}/admin/products`)
         .then((res) => {
-          console.log(res.data.products)
-          //   this.products = res.data.products
+          this.products = res.data.products
         })
         .catch((err) => {
           alert(err.response.data.message)
@@ -277,7 +310,9 @@ export default {
     openProductModal(state, product) {
       if (state === 'new') {
         this.state = '新增'
-        this.tempProduct = {}
+        this.tempProduct = {
+          imagesUrl: []
+        }
         productModalUse.show()
       } else if (state === 'edit') {
         this.state = '編輯'
@@ -291,7 +326,7 @@ export default {
     confirmProduct(state) {
       if (state === '新增') {
         this.axios
-          .post(`${VITE_API}/api/${VITE_PATH}/admin/product`, this.tempProduct)
+          .post(`${VITE_API}/api/${VITE_PATH}/admin/product`, { data: this.tempProduct })
           .then((res) => {
             productModalUse.hide()
             this.getProducts()
@@ -323,6 +358,10 @@ export default {
         .catch((err) => {
           alert(err.response.data.message)
         })
+    },
+    noConfirmProduct() {
+      this.getProducts()
+      productModalUse.hide()
     }
   },
   mounted() {
