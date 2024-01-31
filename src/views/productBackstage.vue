@@ -84,10 +84,11 @@
                 <img class="img-fluid" :src="tempProduct.imageUrl" alt="" />
               </div>
               <h3 class="mb-3">多圖新增</h3>
-              <div v-if="Array.isArray(tempProduct.imagesUrl)">
+              <template v-if="Array.isArray(tempProduct.imagesUrl)">
                 <div v-for="(img, key) in tempProduct.imagesUrl" :key="key">
                   <label for="imageUrl" class="form-label">圖片{{ key + 1 }}網址</label>
                   <input
+                    id="imageUrl"
                     type="text"
                     class="form-control mb-3"
                     placeholder="請輸入圖片連結"
@@ -112,7 +113,7 @@
                 >
                   刪除圖片
                 </button>
-              </div>
+              </template>
 
               <!-- <div v-if="!tempProduct.imageUrl">
                 <button class="btn btn-outline-primary btn-sm d-block w-100">新增圖片</button>
@@ -146,7 +147,7 @@
                   />
                 </div>
                 <div class="mb-3 col-md-6">
-                  <label for="price" class="form-label">單位</label>
+                  <label for="unit" class="form-label">單位</label>
                   <input
                     id="unit"
                     type="text"
@@ -166,7 +167,7 @@
                     min="0"
                     class="form-control"
                     placeholder="請輸入原價"
-                    v-model="tempProduct['origin_price']"
+                    v-model.number="tempProduct['origin_price']"
                   />
                 </div>
                 <div class="mb-3 col-md-6">
@@ -177,7 +178,7 @@
                     min="0"
                     class="form-control"
                     placeholder="請輸入售價"
-                    v-model="tempProduct.price"
+                    v-model.number="tempProduct.price"
                   />
                 </div>
               </div>
@@ -197,7 +198,7 @@
               <div class="mb-3">
                 <label for="content" class="form-label">說明內容</label>
                 <textarea
-                  id="description"
+                  id="content"
                   type="text"
                   class="form-control"
                   placeholder="請輸入說明內容"
@@ -252,7 +253,7 @@
           ></button>
         </div>
         <div class="modal-body">
-          是否刪除
+          是否刪除{{ tempProduct.title }}
           <strong class="text-danger"></strong> 商品(刪除後將無法恢復)。
         </div>
         <div class="modal-footer">
@@ -316,7 +317,7 @@ export default {
         productModalUse.show()
       } else if (state === 'edit') {
         this.state = '編輯'
-        this.tempProduct = product
+        this.tempProduct = { ...product }
         productModalUse.show()
       } else if (state === 'del') {
         this.tempProduct = product
